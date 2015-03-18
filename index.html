@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>全景</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: rgb(200,200,200);
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				color: #ffffff;
+				padding: 5px;
+				font-family:Monospace;
+				font-size:13px;
+				font-weight: bold;
+				text-align:center;
+				z-index: 9999
+			}
+			#containerA{
+				position:absolute;
+				width:100%;
+				z-index:999;
+				opacity:0;
+				top:0px;
+				left:0px;}
+			a {
+				color: #ffffff;
+			}
+		</style>
+        <script type="text/javascript" src="js/zepto/zepto.js"></script>
+        <script type="text/javascript" src="js/zepto/detect.js"></script>
+        <script type="text/javascript" src="js/zepto/event.js"></script>
+        <script type="text/javascript" src="js/zepto/ajax.js"></script>
+        <script type="text/javascript" src="js/zepto/form.js"></script>
+        <script type="text/javascript" src="js/zepto/fx.js"></script>
+        <script type="text/javascript" src="js/zepto/fx_methods.js"></script>
+        <script type="text/javascript" src="js/zepto/data.js"></script>
+        <script type="text/javascript" src="js/zepto/assets.js"></script>
+        <script type="text/javascript" src="js/zepto/selector.js"></script>
+        <script type="text/javascript" src="js/zepto/zTouch.js"></script>		
+		<script type="text/javascript" src="js/three.min.js"></script>
+
+		<script type="text/javascript" src="js/renderers/Projector.js"></script>
+		<script type="text/javascript" src="js/renderers/CanvasRenderer.js"></script>
+        <script type="text/javascript" src="js/fishEye.js"></script>
+	</head>
+	<body>
+
+		<div id="container"></div>
+        <div id="containerA"></div>
+		<div id="info">请点击建筑</div>
+
+
+		<script>
+			/*空间贴图,热区*/	
+			var textureGroup = {
+					"#255#255#255" : {
+						texture : [/*[展示层,id通道层]*/
+							["texture/pisa/px.gif","texture/pisa/nx.gif","texture/pisa/py.gif","texture/pisa/ny.gif","texture/pisa/pz.gif","texture/pisa/nz.gif"],/*右，左，上，下，前，后*/
+							["texture/pisa/pxa.gif","texture/pisa/nxa.gif","texture/pisa/pya.gif","texture/pisa/nya.gif","texture/pisa/pza.gif","texture/pisa/nza.gif"]/*右，左，上，下，前，后*/
+						],
+						data : {}/*返回后台的数据*/
+					},
+                    "#255#0#0" : {
+                        texture : [/*[展示层,id通道层]*/
+                            ["texture/skybox/px.gif","texture/skybox/nx.gif","texture/skybox/py.gif","texture/skybox/ny.gif","texture/skybox/pz.gif","texture/skybox/nz.gif"],/*右，左，上，下，前，后*/
+                            ["texture/skybox/px.gif","texture/skybox/nx.gif","texture/skybox/py.gif","texture/skybox/ny.gif","texture/skybox/pz.gif","texture/skybox/nz.gif"]/*右，左，上，下，前，后*/
+                        ],
+                        data : {}/*返回后台的数据*/
+                    }
+				};
+            /*描述,标签*/
+			var descriptionGroup = {
+					"#255#255#255" : {
+						description : "描述",/*出现的标签*/
+						data : {}/*返回后台的数据*/
+					}
+				};
+				
+			fishEye.setContainer(["container","containerA"]);/*[展示层,id通道层]*/
+			fishEye.reload3D(textureGroup["#255#255#255"]);/*默认展示的空间*/
+			
+            /*触摸事件*/
+			$("#containerA").on("touchstart",function(e){
+				e.preventDefault();
+       			 $(this).data("touchTime",new Date().getTime());
+       			 $(this).data("touchPoint",{"pageX":e.touches[0].pageX,"pageY":e.touches[0].pageY});
+    		});
+			$("#containerA").on("touchend",function(e){
+				e.stopPropagation();
+				e.preventDefault();
+        		var endTime = new Date().getTime();
+        		if((endTime - $(this).data("touchTime")) < 600){/*点击才触发*/
+                    var selectColor = fishEye.getColor($(this).data("touchPoint"),1);/*[坐标，层号]获得色植*/
+        			$("#info").html(selectColor);
+                    if(textureGroup[selectColor]){
+                        fishEye.reload3D(textureGroup[selectColor]);/*换场景*/
+                    };
+        		};
+    		});
+			
+		</script>
+	</body>
+</html>
