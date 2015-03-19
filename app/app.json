@@ -1,0 +1,132 @@
+{
+	"project": {
+		"vr": false
+	},
+	"camera": {
+		"metadata": {
+			"version": 4.3,
+			"type": "Object",
+			"generator": "ObjectExporter"
+		},
+		"object": {
+			"uuid": "E787322B-4D5E-4F9B-88FC-3756D109AE25",
+					"type": "PerspectiveCamera",
+					"name": "PerspectiveCamera 1",
+					"fov": 70,
+					"aspect": 1,
+					"near": 1,
+					"far": 10000,
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]
+		}
+	},
+	"scene": {
+		"metadata": {
+			"version": 4.3,
+			"type": "Object",
+			"generator": "ObjectExporter"
+		},
+		"geometries": [
+			{
+				"uuid": "D289B7AB-FB6A-49C7-A02D-13CD5301E0A7",
+				"type": "PlaneGeometry",
+				"name": "nzG",
+				"width": 200,
+				"height": 200,
+				"widthSegments": 7,
+				"heightSegments": 7
+			}],
+		"materials": [
+			{
+				"uuid": "68E485EF-F591-4522-A539-0EFB448D8C20",
+				"type": "MeshBasicMaterial",
+				"name": "nzM",
+				"color": 16777215
+			},
+			{
+				"uuid": "78563904-3901-4E61-ADF6-C91DA9157D75",
+				"type": "MeshBasicMaterial",
+				"name": "nxM",
+				"color": 16777215
+			},
+			{
+				"uuid": "FA6DB226-8987-4D0B-BE79-5734D273C3A3",
+				"type": "MeshBasicMaterial",
+				"name": "pzM",
+				"color": 16777215
+			},
+			{
+				"uuid": "B22888FF-3AED-4240-8EAF-7A9066526E29",
+				"type": "MeshBasicMaterial",
+				"name": "pxM",
+				"color": 16777215
+			},
+			{
+				"uuid": "7C0C0D2A-5B32-4C01-A5B2-85EF619A505B",
+				"type": "MeshBasicMaterial",
+				"name": "nyM",
+				"color": 16777215
+			},
+			{
+				"uuid": "87138A34-61CA-4F80-9979-4AE65787B854",
+				"type": "MeshBasicMaterial",
+				"name": "pyM",
+				"color": 16777215
+			}],
+		"object": {
+			"uuid": "2C366EED-9179-4F69-BDCF-5BD797F2EBF2",
+			"type": "Scene",
+			"name": "Scene",
+			"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+			"children": [
+				{
+					"uuid": "B75F8A48-D3E3-4212-B32F-EE7E085F9ECB",
+					"type": "Mesh",
+					"name": "nz",
+					"geometry": "D289B7AB-FB6A-49C7-A02D-13CD5301E0A7",
+					"material": "68E485EF-F591-4522-A539-0EFB448D8C20",
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,-100,1]
+				},
+				{
+					"uuid": "2952A2A1-004D-4C81-BF24-BE51B6BDFE99",
+					"type": "Mesh",
+					"name": "nx",
+					"geometry": "D289B7AB-FB6A-49C7-A02D-13CD5301E0A7",
+					"material": "78563904-3901-4E61-ADF6-C91DA9157D75",
+					"matrix": [0.0007961748051457107,0,0.9999997019767761,0,0,1,0,0,-0.9999997019767761,0,0.0007961748051457107,0,100,0,0,1]
+				},
+				{
+					"uuid": "13CF11E9-3DE4-4547-A65E-D774DDC15420",
+					"type": "Mesh",
+					"name": "pz",
+					"geometry": "D289B7AB-FB6A-49C7-A02D-13CD5301E0A7",
+					"material": "FA6DB226-8987-4D0B-BE79-5734D273C3A3",
+					"matrix": [-0.9999987483024597,0,-0.0015926528722047806,0,0,1,0,0,0.0015926528722047806,0,-0.9999987483024597,0,0,0,100,1]
+				},
+				{
+					"uuid": "AF6EE1CA-E335-4AC4-A1C9-FE5CECF68970",
+					"type": "Mesh",
+					"name": "px",
+					"geometry": "D289B7AB-FB6A-49C7-A02D-13CD5301E0A7",
+					"material": "B22888FF-3AED-4240-8EAF-7A9066526E29",
+					"matrix": [0.0007961748051457107,0,-0.9999997019767761,0,0,1,0,0,0.9999997019767761,0,0.0007961748051457107,0,-100,0,0,1]
+				},
+				{
+					"uuid": "3C4EA44C-F53A-49CA-8A0C-6D95CF56BF52",
+					"type": "Mesh",
+					"name": "ny",
+					"geometry": "D289B7AB-FB6A-49C7-A02D-13CD5301E0A7",
+					"material": "7C0C0D2A-5B32-4C01-A5B2-85EF619A505B",
+					"matrix": [-0.9999987483024597,0.000001268227606487926,-0.0015926524065434933,0,-0.0015926528722047806,-0.0007963662501424551,0.9999983906745911,0,-1.1280566758475885e-10,0.9999997019767761,0.0007963721291162074,0,0,-100,0,1]
+				},
+				{
+					"uuid": "00CD21E5-EADB-4AEC-9FF4-8814FF7DDA10",
+					"type": "Mesh",
+					"name": "py",
+					"geometry": "D289B7AB-FB6A-49C7-A02D-13CD5301E0A7",
+					"material": "87138A34-61CA-4F80-9979-4AE65787B854",
+					"matrix": [-0.9999987483024597,0.000001268227606487926,0.0015926524065434933,0,-0.0015926528722047806,-0.0007963662501424551,-0.9999983906745911,0,1.1280566758475885e-10,-0.9999997019767761,0.0007963721291162074,0,0,100,0,1]
+				}]
+		}
+	},
+	"scripts": {}
+}
