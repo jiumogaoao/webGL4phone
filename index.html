@@ -21,13 +21,6 @@
 				text-align:center;
 				z-index: 9999
 			}
-			#containerA{
-				position:absolute;
-				width:100%;
-				z-index:999;
-				opacity:0;
-				top:0px;
-				left:0px;}
 			a {
 				color: #ffffff;
 			}
@@ -52,7 +45,6 @@
 	<body>
 
 		<div id="container"></div>
-        <div id="containerA"></div>
 		<div id="info">请点击建筑</div>
 
 
@@ -82,25 +74,25 @@
 					}
 				};
 				
-			fishEye.setContainer(["container","containerA"]);/*[展示层,id通道层]*/
+			fishEye.setContainer("container");/*[展示层,id通道层]*/
 			fishEye.reload3D(textureGroup["#255#255#255"]);/*默认展示的空间*/
 			
             /*触摸事件*/
-			$("#containerA").on("touchstart",function(e){
+			$("#container").on("touchstart",function(e){
 				e.preventDefault();
        			 $(this).data("touchTime",new Date().getTime());
        			 $(this).data("touchPoint",{"pageX":e.touches[0].pageX,"pageY":e.touches[0].pageY});
     		});
-			$("#containerA").on("touchend",function(e){
+			$("#container").on("touchend",function(e){
 				e.stopPropagation();
 				e.preventDefault();
         		var endTime = new Date().getTime();
         		if((endTime - $(this).data("touchTime")) < 600){/*点击才触发*/
-                    var selectColor = fishEye.getColor($(this).data("touchPoint"),1);/*[坐标，层号]获得色植*/
-        			$("#info").html(selectColor);
+                   /* var selectColor = fishEye.getColor($(this).data("touchPoint"),1);*//*[坐标，层号]获得色植*/
+        			/*$("#info").html(selectColor);
                     if(textureGroup[selectColor]){
-                        fishEye.reload3D(textureGroup[selectColor]);/*换场景*/
-                    };
+                        fishEye.reload3D(textureGroup[selectColor]);*//*换场景*/
+                   /* };*/
         		};
     		});
 			

@@ -1,8 +1,7 @@
 // JavaScript Document
 var fishEye={};
 ;(function(){
-	var camera=[], scene=[], renderer=[],pic=[],containerDom=[];
-	
+	var camera, scene, renderer,pic,containerDom,raycaster,mouse, mesh;
 	var texture_placeholder,
 			isUserInteracting = false,
 			onMouseDownMouseX = 0, onMouseDownMouseY = 0,
@@ -14,29 +13,30 @@ var fishEye={};
 	function init() {
 
 				
-				$.each(containerDom,function(u,v){
-				$("#"+v).empty();
-				var container, mesh;	
+				
+				$("#"+containerDom).empty();
+				var container;	
 					
-					container = document.getElementById( v );
+					container = document.getElementById( containerDom );
 					
-					camera[u] = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1100 );
+					camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1100 );
 					
-					scene[u] = new THREE.Scene();
+					scene = new THREE.Scene();
 					
 					texture_placeholder = document.createElement( 'canvas' );
-				texture_placeholder.width = 16;
-				texture_placeholder.height = 16;
+				texture_placeholder.width = 128;
+				texture_placeholder.height = 128;
 				
 				var context = texture_placeholder.getContext( '2d' );
 				context.fillStyle = 'rgb( 200, 200, 200 )';
 				context.fillRect( 0, 0, texture_placeholder.width, texture_placeholder.height );
 				
-				var materials = pic[u];
+				var materials = pic;
 				
 				mesh = new THREE.Mesh( new THREE.BoxGeometry( 300, 300, 300, 7, 7, 7 ), new THREE.MeshFaceMaterial( materials ) );
 				mesh.scale.x = - 1;
-				scene[u].add( mesh );
+				
+				scene.add( mesh );
 				for ( var i = 0, l = mesh.geometry.vertices.length; i < l; i ++ ) {
 
 					var vertex = mesh.geometry.vertices[ i ];
@@ -45,15 +45,13 @@ var fishEye={};
 					vertex.multiplyScalar( 550 );
 
 				}
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+				renderer = new THREE.CanvasRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
 				
-				renderer[u] = new THREE.CanvasRenderer();
-				renderer[u].setPixelRatio( window.devicePixelRatio );
-				renderer[u].setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer[u].domElement );
-				
-				
-					})			
-
 				document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 				document.addEventListener( 'mouseup', onDocumentMouseUp, false );
@@ -70,11 +68,11 @@ var fishEye={};
 			}
 			
 	function onWindowResize() {
-				$.each(containerDom,function(u,v){
-					camera[u].aspect = window.innerWidth / window.innerHeight;
-				camera[u].updateProjectionMatrix();
-				renderer[u].setSize( window.innerWidth, window.innerHeight );
-					})
+				
+					camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+					
 				
 
 			}
@@ -110,6 +108,16 @@ var fishEye={};
 				onPointerDownLon = lon;
 				onPointerDownLat = lat;
 
+				mouse.x = ( event.clientX / renderer.domElement.width ) * 2 - 1;
+				mouse.y = - ( event.clientY / renderer.domElement.height ) * 2 + 1;
+
+				raycaster.setFromCamera( mouse, camera );
+
+				var intersects = raycaster.intersectObjects( scene.children );
+				debugger;
+				if ( intersects.length > 0 ) {
+					console.log(intersects[ 0 ].point);
+				}
 			}
 
 			function onDocumentMouseMove( event ) {
@@ -119,8 +127,8 @@ var fishEye={};
 					
 				if ( isUserInteracting === true ) {
 
-					lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
-					lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+					lon = ( onPointerDownPointerX - event.clientX ) * 0.1*window.devicePixelRatio + onPointerDownLon;
+					lat = ( event.clientY - onPointerDownPointerY ) * 0.1*window.devicePixelRatio + onPointerDownLat;
 
 				}
 			}
@@ -134,29 +142,29 @@ var fishEye={};
 			}
 
 			function onDocumentMouseWheel( event ) {
-				$.each(containerDom,function(u,v){
+				
 					// WebKit
 
 				if ( event.wheelDeltaY ) {
 
-					camera[u].fov -= event.wheelDeltaY * 0.05;
+					camera.fov -= event.wheelDeltaY * 0.05;
 
 				// Opera / Explorer 9
 
 				} else if ( event.wheelDelta ) {
 
-					camera[u].fov -= event.wheelDelta * 0.05;
+					camera.fov -= event.wheelDelta * 0.05;
 
 				// Firefox
 
 				} else if ( event.detail ) {
 
-					camera[u].fov -= event.detail * 0.05;
+					camera.fov -= event.detail * 0.05;
 
 				}
 
-				camera[u].updateProjectionMatrix();
-					})
+				camera.updateProjectionMatrix();
+				
 				
 
 			}
@@ -167,13 +175,11 @@ var fishEye={};
 
 					event.stopPropagation();
 					event.preventDefault();
-
-					onPointerDownPointerX = event.touches[ 0 ].pageX;
-					onPointerDownPointerY = event.touches[ 0 ].pageY;
-
-					onPointerDownLon = lon;
-					onPointerDownLat = lat;
-
+					event.preventDefault();
+				
+				event.clientX = event.touches[0].clientX;
+				event.clientY = event.touches[0].clientY;
+				onDocumentMouseDown( event );
 				}
 
 			}
@@ -185,8 +191,9 @@ var fishEye={};
 					event.stopPropagation();
 					event.preventDefault();
 
-					lon = ( onPointerDownPointerX - event.touches[0].pageX ) * 0.1 + onPointerDownLon;
-					lat = ( event.touches[0].pageY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+					event.clientX = event.touches[0].clientX;
+				event.clientY = event.touches[0].clientY;
+				onDocumentMouseMove( event );
 
 				}
 
@@ -213,12 +220,12 @@ var fishEye={};
 				target.x = 500 * Math.sin( phi ) * Math.cos( theta );
 				target.y = 500 * Math.cos( phi );
 				target.z = 500 * Math.sin( phi ) * Math.sin( theta );
-				$.each(containerDom,function(u,v){
-					camera[u].position.copy( target ).negate();
-				camera[u].lookAt( target );
+				
+					camera.position.copy( target ).negate();
+				camera.lookAt( target );
 
-				renderer[u].render( scene[u], camera[u] );
-					})
+				renderer.render( scene, camera );
+					
 				
 
 			}
@@ -226,17 +233,14 @@ var fishEye={};
 			
 	function reload3D(textureArry){
 				pic = [];
-				$.each(textureArry.texture,function(u,v){
-					pic[u] = [];
-				$.each(v,function(i,n){
-					pic[u][i] = loadTexture( n );
-					});
+				$.each(textureArry.texture[0],function(u,v){
+					pic[u] = loadTexture( v );
 				});
 				init();
 				animate();
 				};
-	function setContainer(containerGroup){
-		containerDom = containerGroup;
+	function setContainer(container){
+		containerDom = container;
 		};
 
 	function getColor(touchPoint,num){
