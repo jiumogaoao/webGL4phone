@@ -9,10 +9,17 @@ var APP = {
 		var scope = this;
 
 		var loader = new THREE.ObjectLoader();
-		var camera, scene, renderer,texture_placeholder,pic;
+		var camera, scene, renderer,texture_placeholder,pic,
+			isUserInteracting = false,
+			onMouseDownMouseX = 0, onMouseDownMouseY = 0,
+			lon = 90, onMouseDownLon = 0,
+			lat = 0, onMouseDownLat = 0,
+			phi = 0, theta = 0,
+			target = new THREE.Vector3();
 		pic={};
 		var vr, controls;
-
+		var raycaster = new THREE.Raycaster();
+		var mouse = new THREE.Vector2();
 		var events = {};
 
 		this.dom = undefined;
@@ -65,54 +72,58 @@ var APP = {
 			events = {
 				keydown: [],
 				keyup: [],
-				mousedown: [],
+				mousedown: [
+				function(event){	
+					event.stopPropagation();
+					event.preventDefault();
+	
+					mouse.x = ( event.clientX / renderer.domElement.width ) * 2 - 1;
+					mouse.y = - ( event.clientY / renderer.domElement.height ) * 2 + 1;
+	
+					raycaster.setFromCamera( mouse, camera );
+	
+					var intersects = raycaster.intersectObjects( scene.children );
+					debugger;
+					if ( intersects.length > 0 ) {
+						console.log(intersects[ 0 ].point);
+					}
+			
+				}
+				],
 				mouseup: [],
 				mousemove: [],
 				touchstart: [],
 				touchend: [],
 				touchmove: [],
-				update: []
+				update: [
+					function(){
+								if ( isUserInteracting === false ) {
+		
+							lon += 0.1*window.devicePixelRatio;
+		
+						}
+		
+						lat = Math.max( - 85, Math.min( 85, lat ) );
+						phi = THREE.Math.degToRad( 90 - lat );
+						theta = THREE.Math.degToRad( lon );
+		
+						target.x = 500 * Math.sin( phi ) * Math.cos( theta );
+						target.y = 500 * Math.cos( phi );
+						target.z = 500 * Math.sin( phi ) * Math.sin( theta );
+						
+						camera.position.copy( target ).negate();
+						console.log(camera.position)
+						camera.lookAt( target );
+						}
+				]
 			};
 				
 				
 				
 
 			$.each(scene.children,function(i,n){
-				console.log(pic[n.name])
 				n.material=pic[n.name];
 			})
-	
-			
-			for ( var uuid in json.scripts ) {
-
-				var object = scene.getObjectByProperty( 'uuid', uuid, true );
-
-				var scripts = json.scripts[ uuid ];
-
-				for ( var i = 0; i < scripts.length; i ++ ) {
-
-					var script = scripts[ i ];
-
-					var functions = ( new Function( 'player, scene, keydown, keyup, mousedown, mouseup, mousemove, touchstart, touchend, touchmove, update', script.source + '\nreturn { keydown: keydown, keyup: keyup, mousedown: mousedown, mouseup: mouseup, mousemove: mousemove, touchstart: touchstart, touchend: touchend, touchmove: touchmove, update: update };' ).bind( object ) )( this, scene );
-
-					for ( var name in functions ) {
-
-						if ( functions[ name ] === undefined ) continue;
-
-						if ( events[ name ] === undefined ) {
-
-							console.warn( 'APP.Player: event type not supported (', name, ')' );
-							continue;
-
-						}
-
-						events[ name ].push( functions[ name ].bind( object ) );
-
-					}
-
-				}
-
-			}
 
 		};
 
@@ -121,43 +132,6 @@ var APP = {
 			camera = value;
 			camera.aspect = this.width / this.height;
 			camera.updateProjectionMatrix();
-
-
-			if ( vr === true ) {
-
-				if ( camera.parent === undefined ) {
-
-					// camera needs to be in the scene so camera2 matrix updates
-					
-					scene.add( camera );
-
-				}
-
-				var camera2 = camera.clone();
-				camera.add( camera2 );
-
-				camera = camera2;
-
-				controls = new THREE.VRControls( camera );
-				renderer = new THREE.VREffect( renderer );
-
-				document.addEventListener( 'keyup', function ( event ) {
-
-					switch ( event.keyCode ) {
-						case 90:
-							controls.zeroSensor();
-							break;
-					}
-
-				} );
-
-				this.dom.addEventListener( 'dblclick', function () {
-
-					renderer.setFullScreen( true );
-
-				} );
-
-			}
 
 		};
 
@@ -198,8 +172,6 @@ var APP = {
 			request = requestAnimationFrame( animate );
 
 			dispatch( events.update, { time: time, delta: time - prevTime } );
-
-			if ( vr ) controls.update();
 
 			renderer.render( scene, camera );
 
@@ -253,7 +225,7 @@ var APP = {
 		};
 
 		var onDocumentMouseDown = function ( event ) {
-
+			
 			dispatch( events.mousedown, event );
 
 		};
