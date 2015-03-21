@@ -9,6 +9,16 @@
 			margin: 0px;
 			overflow: hidden;
 		}
+		#message{
+			width:100%;
+			font-size:15px;
+			color:#fff;
+			position:absolute;
+			top:0px;
+			left:0px;
+			z-index:9999999;
+			text-align:center
+			}
 		</style>
 	</head>
 	<body ontouchstart="">
@@ -34,18 +44,18 @@
 
 				var player = new APP.Player();
 				player.reload({
-					"nz": "nz.gif",
-					"nx": "nx.gif",
-					"ny": "ny.gif",
-					"px": "px.gif",
-					"py": "py.gif",
-					"pz": "pz.gif"
+					"nz": "nz.jpg",
+					"nx": "nx.jpg",
+					"ny": "ny.jpg",
+					"px": "px.jpg",
+					"py": "py.jpg",
+					"pz": "pz.jpg"
 				})
 				player.load( JSON.parse( text ) );
 				player.setSize( window.innerWidth, window.innerHeight );
 				player.play();
 
-				document.body.appendChild( player.dom );
+				//document.body.appendChild( player.dom );
 
 				window.addEventListener( 'resize', function () {
 					player.setSize( window.innerWidth, window.innerHeight );
@@ -54,5 +64,7 @@
 			} );
 
 		</script>
+        <div id="container"></div>
+        <div id="message">请点击</div>
 	</body>
 </html>

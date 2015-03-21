@@ -46,6 +46,7 @@ var fishEye={};
 
 				}
 				raycaster = new THREE.Raycaster();
+				raycaster.far=100000;
 				mouse = new THREE.Vector2();
 				renderer = new THREE.CanvasRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );

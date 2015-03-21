@@ -1,21 +1,31 @@
 /**
  * @author mrdoob / http://mrdoob.com/
  */
-
 var APP = {
 
 	Player: function () {
-
+	
+window.requestAnimationFrame = (function(){ 
+return window.requestAnimationFrame || 
+window.webkitRequestAnimationFrame || 
+window.mozRequestAnimationFrame || 
+window.oRequestAnimationFrame || 
+window.msRequestAnimationFrame || 
+function(/* function */ callback, /* DOMElement */ element){ 
+window.setTimeout(callback, 1000 / 60); 
+}; 
+})(); 
 		var scope = this;
 
 		var loader = new THREE.ObjectLoader();
-		var camera, scene, renderer,texture_placeholder,pic,
+		var camera, scene, renderer,texture_placeholder,pic,container,
 			isUserInteracting = false,
 			onMouseDownMouseX = 0, onMouseDownMouseY = 0,
 			lon = 90, onMouseDownLon = 0,
 			lat = 0, onMouseDownLat = 0,
 			phi = 0, theta = 0,
 			target = new THREE.Vector3();
+			container = document.getElementById( "container" );
 		pic={};
 		var vr, controls;
 		var raycaster = new THREE.Raycaster();
@@ -60,15 +70,31 @@ var APP = {
 		this.load = function ( json ) {
 
 			vr = json.project.vr;
+			function webglAvailable() {
+		try {
+			var canvas = document.createElement( 'canvas' );
+			return !!( window.WebGLRenderingContext && (
+				canvas.getContext( 'webgl' ) ||
+				canvas.getContext( 'experimental-webgl' ) )
+			);
+		} catch ( e ) {
+			return false;
+		}
+	}
 
-			renderer = new THREE.CanvasRenderer( { antialias: true } );
+	if ( webglAvailable() ) {
+		renderer = new THREE.WebGLRenderer();
+	} else {
+		renderer = new THREE.CanvasRenderer();
+	}
+			//renderer = new THREE.CanvasRenderer( { antialias: true } );
 			renderer.setClearColor( 0x000000 );
-			renderer.setPixelRatio( window.devicePixelRatio );
-			this.dom = renderer.domElement;
+			//renderer.setPixelRatio( window.devicePixelRatio );
+			container.appendChild( renderer.domElement );
 
 			this.setScene( loader.parse( json.scene ) );
-			this.setCamera( loader.parse( json.camera ) );
-
+			//this.setCamera( loader.parse( json.camera ) );
+			camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1100 );
 			events = {
 				keydown: [],
 				keyup: [],
@@ -83,23 +109,42 @@ var APP = {
 					raycaster.setFromCamera( mouse, camera );
 	
 					var intersects = raycaster.intersectObjects( scene.children );
-					debugger;
 					if ( intersects.length > 0 ) {
-						console.log(intersects[ 0 ].point);
+						$("#message").html("x:"+intersects[ 0 ].point.x+" y:"+intersects[ 0 ].point.y+" z:"+intersects[ 0 ].point.z)
 					}
 			
 				}
 				],
 				mouseup: [],
 				mousemove: [],
-				touchstart: [],
+				touchstart: [
+					function(event){	
+					event.stopPropagation();
+					event.preventDefault();
+					event.clientX=event.touches[0].clientX
+					event.clientY=event.touches[0].clientY
+					mouse.x = ( event.clientX / renderer.domElement.width ) * 2 - 1;
+					mouse.y = - ( event.clientY / renderer.domElement.height ) * 2 + 1;
+	
+					raycaster.setFromCamera( mouse, camera );
+	
+					var intersects = raycaster.intersectObjects( scene.children );
+					if ( intersects.length > 0 ) {
+						$("#message").html("x:"+intersects[ 0 ].point.x+" y:"+intersects[ 0 ].point.y+" z:"+intersects[ 0 ].point.z)
+					}
+			
+				}
+				],
 				touchend: [],
 				touchmove: [],
 				update: [
 					function(){
 								if ( isUserInteracting === false ) {
-		
-							lon += 0.1*window.devicePixelRatio;
+							var addLon=0.1;
+							if($.os.phone){
+								addLon=1
+								}
+							lon += addLon;
 		
 						}
 		
@@ -112,7 +157,7 @@ var APP = {
 						target.z = 500 * Math.sin( phi ) * Math.sin( theta );
 						
 						camera.position.copy( target ).negate();
-						console.log(camera.position)
+				
 						camera.lookAt( target );
 						}
 				]
@@ -168,7 +213,6 @@ var APP = {
 		var prevTime, request;
 
 		var animate = function ( time ) {
-
 			request = requestAnimationFrame( animate );
 
 			dispatch( events.update, { time: time, delta: time - prevTime } );
@@ -191,7 +235,7 @@ var APP = {
 			document.addEventListener( 'touchmove', onDocumentTouchMove );
 
 			request = requestAnimationFrame( animate );
-			prevTime = performance.now();
+			prevTime = new Date().getTime();
 
 		};
 
