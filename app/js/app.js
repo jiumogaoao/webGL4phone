@@ -1,24 +1,43 @@
 /**
  * @author mrdoob / http://mrdoob.com/
  */
+if(!requestAnimationFrame){
+	window.requestAnimationFrame = (function(){ 
+		return window.requestAnimationFrame || 
+			window.webkitRequestAnimationFrame || 
+			window.mozRequestAnimationFrame || 
+			window.oRequestAnimationFrame || 
+			window.msRequestAnimationFrame || 
+			function(/* function */ callback, /* DOMElement */ element){ 
+				window.setTimeout(callback, 1000 / 60); 
+			}; 
+	})(); 
+}
 var APP = {
 
 	Player: function () {
-	
-window.requestAnimationFrame = (function(){ 
-return window.requestAnimationFrame || 
-window.webkitRequestAnimationFrame || 
-window.mozRequestAnimationFrame || 
-window.oRequestAnimationFrame || 
-window.msRequestAnimationFrame || 
-function(/* function */ callback, /* DOMElement */ element){ 
-window.setTimeout(callback, 1000 / 60); 
-}; 
-})(); 
+
 		var scope = this;
 
 		var loader = new THREE.ObjectLoader();
 		var camera, scene, renderer,texture_placeholder,pic,container,
+			touch={},
+			canvasArry={
+				"nz": $('<canvas width="512" height="512"></canvas>'),
+				"nx": $('<canvas width="512" height="512"></canvas>'),
+				"ny": $('<canvas width="512" height="512"></canvas>'),
+				"px": $('<canvas width="512" height="512"></canvas>'),
+				"py": $('<canvas width="512" height="512"></canvas>'),
+				"pz": $('<canvas width="512" height="512"></canvas>')
+			},
+			contexts={
+				"nz": canvasArry.nz[0].getContext("2d"),
+				"nx": canvasArry.nx[0].getContext("2d"),
+				"ny": canvasArry.ny[0].getContext("2d"),
+				"px": canvasArry.px[0].getContext("2d"),
+				"py": canvasArry.py[0].getContext("2d"),
+				"pz": canvasArry.pz[0].getContext("2d")
+			},
 			isUserInteracting = false,
 			onMouseDownMouseX = 0, onMouseDownMouseY = 0,
 			lon = 90, onMouseDownLon = 0,
@@ -26,7 +45,8 @@ window.setTimeout(callback, 1000 / 60);
 			phi = 0, theta = 0,
 			target = new THREE.Vector3();
 			container = document.getElementById( "container" );
-		pic={};
+			pic={};
+			
 		var vr, controls;
 		var raycaster = new THREE.Raycaster();
 		var mouse = new THREE.Vector2();
@@ -38,8 +58,8 @@ window.setTimeout(callback, 1000 / 60);
 		this.height = 500;
 
 		texture_placeholder = document.createElement( 'canvas' );
-				texture_placeholder.width = 1024;
-				texture_placeholder.height = 1024;
+				texture_placeholder.width = 512;
+				texture_placeholder.height = 512;
 				
 				var context = texture_placeholder.getContext( '2d' );
 				context.fillStyle = 'rgb( 200, 200, 200 )';
@@ -62,11 +82,59 @@ window.setTimeout(callback, 1000 / 60);
 				return material;
 
 			}
+			
 		this.reload = function(json){
 			for(var texture in json){
 				pic[texture]= loadTexture(json[texture])
 			}
-		}		
+		}
+		
+		this.setCannel=function(json){
+			for(var channel in json){
+				var img=new Image();
+				img.name=channel
+			img.addEventListener("load",loadFunction,false);
+			function loadFunction(){
+				contexts[this.name].drawImage(this,0,0,512,512)
+			}
+			img.src=json[channel]
+				}
+	}	
+		this.chooseColor=function(color){debugger;}
+		function findColor(name,point){
+			var colorContext=contexts[name];
+			var colorX=0;
+			var colorY=0;
+			function three2two(num){
+				return parseInt(((num-483.15972900390625)/(483.15972900390625*2))*512)*(-1)
+				}
+			if(name=="py"){
+				colorX=three2two(point.z);
+				colorY=three2two(point.x);
+				}
+			if(name=="nx"){
+				colorX=three2two(point.x);
+				colorY=three2two(point.y);
+				}
+			if(name=="nz"){
+				colorX=three2two(-point.z);
+				colorY=three2two(point.y);
+				}
+			if(name=="px"){
+				colorX=three2two(-point.x);
+				colorY=three2two(point.y);
+				}
+			if(name=="pz"){
+				colorX=three2two(point.z);
+				colorY=three2two(point.y);
+				}
+			if(name=="ny"){
+				colorX=three2two(-point.z);
+				colorY=three2two(-point.x);
+				}
+			var colorReturn=colorContext.getImageData(colorX, colorY, 1, 1);
+			scope.chooseColor("#"+colorReturn.data[0]+"#"+colorReturn.data[1]+"#"+colorReturn.data[2])
+			}
 		this.load = function ( json ) {
 
 			vr = json.project.vr;
@@ -110,19 +178,58 @@ window.setTimeout(callback, 1000 / 60);
 	
 					var intersects = raycaster.intersectObjects( scene.children );
 					if ( intersects.length > 0 ) {
-						$("#message").html("x:"+intersects[ 0 ].point.x+" y:"+intersects[ 0 ].point.y+" z:"+intersects[ 0 ].point.z)
+						findColor(intersects[ 0 ].object.name,intersects[ 0 ].point)
 					}
 			
-				}
+				},function(event){
+					
+
+					event.stopPropagation();
+					event.preventDefault();
+
+				isUserInteracting = true;
+
+				onPointerDownPointerX = event.clientX;
+				onPointerDownPointerY = event.clientY;
+
+				onPointerDownLon = lon;
+				onPointerDownLat = lat;
+
+			
+					}
 				],
-				mouseup: [],
-				mousemove: [],
+				mouseup: [
+					function(event){
+						event.stopPropagation();
+					event.preventDefault();
+				isUserInteracting = false;
+						}
+				],
+				mousemove: [
+					function(event){
+						
+
+					event.stopPropagation();
+					event.preventDefault();
+					
+				if ( isUserInteracting === true ) {
+
+					lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
+					lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
+
+				}
+			
+						}
+				],
 				touchstart: [
 					function(event){	
 					event.stopPropagation();
 					event.preventDefault();
 					event.clientX=event.touches[0].clientX
 					event.clientY=event.touches[0].clientY
+					touch.time=new Date().getTime();
+					touch.name="";
+					touch.point={};
 					mouse.x = ( event.clientX / renderer.domElement.width ) * 2 - 1;
 					mouse.y = - ( event.clientY / renderer.domElement.height ) * 2 + 1;
 	
@@ -130,13 +237,53 @@ window.setTimeout(callback, 1000 / 60);
 	
 					var intersects = raycaster.intersectObjects( scene.children );
 					if ( intersects.length > 0 ) {
-						$("#message").html("x:"+intersects[ 0 ].point.x+" y:"+intersects[ 0 ].point.y+" z:"+intersects[ 0 ].point.z)
+						touch.name=intersects[ 0 ].object.name;
+						touch.point=intersects[ 0 ].point
 					}
 			
+				},function(event){
+					if ( event.touches.length == 1 ) {
+
+					event.stopPropagation();
+					event.preventDefault();
+
+					onPointerDownPointerX = event.touches[ 0 ].pageX;
+					onPointerDownPointerY = event.touches[ 0 ].pageY;
+
+					onPointerDownLon = lon;
+					onPointerDownLat = lat;
+
 				}
+					}
 				],
-				touchend: [],
-				touchmove: [],
+				touchend: [
+					function(event){
+						var endTime = new Date().getTime();
+						if((endTime-touch.time)<300){
+							findColor(touch.name,touch.point)
+							}
+						}
+				],
+				touchmove: [
+					function(event){
+						
+
+				if ( event.touches.length == 1 ) {
+
+					event.stopPropagation();
+					event.preventDefault();
+					var move = .1;
+					if($.os.phone){
+						move = .5;
+						}
+					lon = ( onPointerDownPointerX - event.touches[0].pageX ) * move + onPointerDownLon;
+					lat = ( event.touches[0].pageY - onPointerDownPointerY ) * move + onPointerDownLat;
+
+				}
+
+			
+						}
+				],
 				update: [
 					function(){
 								if ( isUserInteracting === false ) {
@@ -145,7 +292,6 @@ window.setTimeout(callback, 1000 / 60);
 								addLon=1
 								}
 							lon += addLon;
-		
 						}
 		
 						lat = Math.max( - 85, Math.min( 85, lat ) );
@@ -169,7 +315,6 @@ window.setTimeout(callback, 1000 / 60);
 			$.each(scene.children,function(i,n){
 				n.material=pic[n.name];
 			})
-
 		};
 
 		this.setCamera = function ( value ) {
@@ -303,7 +448,8 @@ window.setTimeout(callback, 1000 / 60);
 			dispatch( events.touchmove, event );
 
 		};
-
+		
+		
 	}
 
 };
