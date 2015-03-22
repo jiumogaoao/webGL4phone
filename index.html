@@ -1,31 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>全景</title>
+		<title>three.js</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
-			body {
-				background-color: rgb(200,200,200);
-				margin: 0px;
-				overflow: hidden;
-			}
-			#info {
-				position: absolute;
-				top: 0px; width: 100%;
-				color: #ffffff;
-				padding: 5px;
-				font-family:Monospace;
-				font-size:13px;
-				font-weight: bold;
-				text-align:center;
-				z-index: 9999
-			}
-			a {
-				color: #ffffff;
+		body {
+			margin: 0px;
+			overflow: hidden;
+		}
+		#message{
+			width:100%;
+			font-size:15px;
+			color:#fff;
+			position:absolute;
+			top:0px;
+			left:0px;
+			z-index:9999999;
+			text-align:center
 			}
 		</style>
-        <script type="text/javascript" src="js/zepto/zepto.js"></script>
+	</head>
+	<body ontouchstart="">
+		<script type="text/javascript" src="js/zepto/zepto.js"></script>
         <script type="text/javascript" src="js/zepto/detect.js"></script>
         <script type="text/javascript" src="js/zepto/event.js"></script>
         <script type="text/javascript" src="js/zepto/ajax.js"></script>
@@ -35,33 +32,27 @@
         <script type="text/javascript" src="js/zepto/data.js"></script>
         <script type="text/javascript" src="js/zepto/assets.js"></script>
         <script type="text/javascript" src="js/zepto/selector.js"></script>
-        <script type="text/javascript" src="js/zepto/zTouch.js"></script>		
-		<script type="text/javascript" src="js/three.min.js"></script>
-
-		<script type="text/javascript" src="js/renderers/Projector.js"></script>
-		<script type="text/javascript" src="js/renderers/CanvasRenderer.js"></script>
-        <script type="text/javascript" src="js/fishEye.js"></script>
-	</head>
-	<body>
-
-		<div id="container"></div>
-		<div id="info">请点击建筑</div>
-
-
+        <script type="text/javascript" src="js/zepto/zTouch.js"></script>
+		<script src="js/three.min.js"></script>
+		<script src="js/CanvasRenderer.js"></script>
+		<script src="js/Projector.js"></script>
+		<script src="js/app.js"></script>
 		<script>
+
+
 			/*空间贴图,热区*/	
 			var textureGroup = {
 					"#255#255#255" : {
-						texture : [/*[展示层,id通道层]*/
-							["texture/pisa/px.gif","texture/pisa/nx.gif","texture/pisa/py.gif","texture/pisa/ny.gif","texture/pisa/pz.gif","texture/pisa/nz.gif"],/*右，左，上，下，前，后*/
-							["texture/pisa/pxa.gif","texture/pisa/nxa.gif","texture/pisa/pya.gif","texture/pisa/nya.gif","texture/pisa/pza.gif","texture/pisa/nza.gif"]/*右，左，上，下，前，后*/
+						texture : [/*[展示层,id通道层],px右,nx左,py上,ny下,pz前,nz后*/
+							{"px":"texture/pisa/px.gif","nx":"texture/pisa/nx.gif","py":"texture/pisa/py.gif","ny":"texture/pisa/ny.gif","pz":"texture/pisa/pz.gif","nz":"texture/pisa/nz.gif"},
+							{"px":"texture/pisa/pxa.gif","nx":"texture/pisa/nxa.gif","py":"texture/pisa/pya.gif","ny":"texture/pisa/nya.gif","pz":"texture/pisa/pza.gif","nz":"texture/pisa/nza.gif"}
 						],
 						data : {}/*返回后台的数据*/
 					},
                     "#255#0#0" : {
-                        texture : [/*[展示层,id通道层]*/
-                            ["texture/skybox/px.gif","texture/skybox/nx.gif","texture/skybox/py.gif","texture/skybox/ny.gif","texture/skybox/pz.gif","texture/skybox/nz.gif"],/*右，左，上，下，前，后*/
-                            ["texture/skybox/px.gif","texture/skybox/nx.gif","texture/skybox/py.gif","texture/skybox/ny.gif","texture/skybox/pz.gif","texture/skybox/nz.gif"]/*右，左，上，下，前，后*/
+                        texture : [/*[展示层,id通道层],px右,nx左,py上,ny下,pz前,nz后*/
+                            {"px":"texture/skybox/px.gif","nx":"texture/skybox/nx.gif","py":"texture/skybox/py.gif","ny":"texture/skybox/ny.gif","pz":"texture/skybox/pz.gif","nz":"texture/skybox/nz.gif"},
+                            {"px":"texture/skybox/px.gif","nx":"texture/skybox/nx.gif","py":"texture/skybox/py.gif","ny":"texture/skybox/ny.gif","pz":"texture/skybox/pz.gif","nz":"texture/skybox/nz.gif"}
                         ],
                         data : {}/*返回后台的数据*/
                     }
@@ -73,29 +64,39 @@
 						data : {}/*返回后台的数据*/
 					}
 				};
+
+
+			var loader = new THREE.XHRLoader();
+			loader.load( 'app.json', function ( text ) {
+
+				var player = new APP.Player();
 				
-			fishEye.setContainer("container");/*[展示层,id通道层]*/
-			fishEye.reload3D(textureGroup["#255#255#255"]);/*默认展示的空间*/
-			
-            /*触摸事件*/
-			$("#container").on("touchstart",function(e){
-				e.preventDefault();
-       			 $(this).data("touchTime",new Date().getTime());
-       			 $(this).data("touchPoint",{"pageX":e.touches[0].pageX,"pageY":e.touches[0].pageY});
-    		});
-			$("#container").on("touchend",function(e){
-				e.stopPropagation();
-				e.preventDefault();
-        		var endTime = new Date().getTime();
-        		if((endTime - $(this).data("touchTime")) < 600){/*点击才触发*/
-                   /* var selectColor = fishEye.getColor($(this).data("touchPoint"),1);*//*[坐标，层号]获得色植*/
-        			/*$("#info").html(selectColor);
-                    if(textureGroup[selectColor]){
-                        fishEye.reload3D(textureGroup[selectColor]);*//*换场景*/
-                   /* };*/
-        		};
-    		});
-			
+				function appReload(color){
+					player.reload(color.texture[0]);
+					player.setCannel(color.texture[1]);
+					}
+				
+				player.chooseColor=function(color){
+				$("#message").html(color)
+					if(textureGroup[color]){
+						$("#container").empty();
+						appReload(textureGroup[color])
+						player.load( JSON.parse( text ) );
+				player.setSize( window.innerWidth, window.innerHeight );
+						}
+					}
+				player.chooseColor("#255#255#255")
+				
+				player.play();
+
+				window.addEventListener( 'resize', function () {
+					player.setSize( window.innerWidth, window.innerHeight );
+				} );
+
+			} );
+
 		</script>
+        <div id="container"></div>
+        <div id="message">请点击</div>
 	</body>
 </html>
