@@ -93,10 +93,11 @@ var APP = {
 			for(var channel in json){
 				var img=new Image();
 				img.name=channel
-			img.addEventListener("load",loadFunction,false);
 			function loadFunction(){
 				contexts[this.name].drawImage(this,0,0,512,512)
 			}
+			img.addEventListener("load",loadFunction,false);
+			
 			img.src=json[channel]
 				}
 	}	
