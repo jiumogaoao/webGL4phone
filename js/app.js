@@ -170,7 +170,9 @@ var APP = {
 				function(event){	
 					event.stopPropagation();
 					event.preventDefault();
-	
+					touch.time=new Date().getTime();
+					touch.name="";
+					touch.point={};
 					mouse.x = ( event.clientX / renderer.domElement.width ) * 2 - 1;
 					mouse.y = - ( event.clientY / renderer.domElement.height ) * 2 + 1;
 	
@@ -178,7 +180,8 @@ var APP = {
 	
 					var intersects = raycaster.intersectObjects( scene.children );
 					if ( intersects.length > 0 ) {
-						findColor(intersects[ 0 ].object.name,intersects[ 0 ].point)
+						touch.name=intersects[ 0 ].object.name;
+						touch.point=intersects[ 0 ].point
 					}
 			
 				},function(event){
@@ -203,6 +206,10 @@ var APP = {
 						event.stopPropagation();
 					event.preventDefault();
 				isUserInteracting = false;
+				var endTime = new Date().getTime();
+						if((endTime-touch.time)<300){
+							findColor(touch.name,touch.point)
+							}
 						}
 				],
 				mousemove: [
