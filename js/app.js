@@ -38,12 +38,31 @@ var APP = {
 				"py": canvasArry.py[0].getContext("2d"),
 				"pz": canvasArry.pz[0].getContext("2d")
 			},
+			textureArry={
+				"nz": $('<canvas width="512" height="512"></canvas>'),
+				"nx": $('<canvas width="512" height="512"></canvas>'),
+				"ny": $('<canvas width="512" height="512"></canvas>'),
+				"px": $('<canvas width="512" height="512"></canvas>'),
+				"py": $('<canvas width="512" height="512"></canvas>'),
+				"pz": $('<canvas width="512" height="512"></canvas>')
+			},
+			textureContexts={
+				"nz": textureArry.nz[0].getContext("2d"),
+				"nx": textureArry.nx[0].getContext("2d"),
+				"ny": textureArry.ny[0].getContext("2d"),
+				"px": textureArry.px[0].getContext("2d"),
+				"py": textureArry.py[0].getContext("2d"),
+				"pz": textureArry.pz[0].getContext("2d")
+			},
+			cacheTexture=$('<canvas width="512" height="512"></canvas>'),
+			cacheContext=cacheTexture[0].getContext("2d"),
+			lastPic=false,
 			isUserInteracting = false,
 			onMouseDownMouseX = 0, onMouseDownMouseY = 0,
 			lon = 90, onMouseDownLon = 0,
 			lat = 0, onMouseDownLat = 0,
 			phi = 0, theta = 0,
-			target = new THREE.Vector3();
+			target = new THREE.Vector3(),
 			container = document.getElementById( "container" );
 			pic={};
 			
@@ -64,16 +83,30 @@ var APP = {
 				var context = texture_placeholder.getContext( '2d' );
 				context.fillStyle = 'rgb( 200, 200, 200 )';
 				context.fillRect( 0, 0, texture_placeholder.width, texture_placeholder.height );
-
-		function loadTexture( path ) {
-
+		function heightLight(name,color){
+			
+			if(lastPic){
+				var lastobj=scene.getChildByName(lastPic)
+			lastobj.material.map.image.src=textureArry[lastPic][0].toDataURL();
+			lastobj.material.map.needsUpdate = true;
+				}
+				lastPic=name;
+				
+			}
+		function loadTexture(name, path ) {
 				var texture = new THREE.Texture( texture_placeholder );
 				var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 1.5 } );
 
 				var image = new Image();
+				image.name=name;
 				image.onload = function () {
-
-					texture.image = this;
+					textureContexts[this.name].drawImage(this,0,0,512,512)
+					
+					var showUrl=textureArry[this.name][0].toDataURL();
+					var showImg=new Image();
+					showImg.src=showUrl;
+					texture.image = showImg;
+					console.log(texture)
 					texture.needsUpdate = true;
 
 				};
@@ -85,7 +118,7 @@ var APP = {
 			
 		this.reload = function(json){
 			for(var texture in json){
-				pic[texture]= loadTexture(json[texture])
+				pic[texture]= loadTexture(texture,json[texture])
 			}
 		}
 		
@@ -134,6 +167,7 @@ var APP = {
 				colorY=three2two(-point.x);
 				}
 			var colorReturn=colorContext.getImageData(colorX, colorY, 1, 1);
+			heightLight(name,colorReturn.data)
 			scope.chooseColor("#"+colorReturn.data[0]+"#"+colorReturn.data[1]+"#"+colorReturn.data[2])
 			}
 		this.load = function ( json ) {
@@ -246,6 +280,7 @@ var APP = {
 					var intersects = raycaster.intersectObjects( scene.children );
 					if ( intersects.length > 0 ) {
 						touch.name=intersects[ 0 ].object.name;
+						console.log(intersects[ 0 ].object)
 						touch.point=intersects[ 0 ].point
 					}
 			
