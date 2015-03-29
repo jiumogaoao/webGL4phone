@@ -83,6 +83,28 @@ var APP = {
 				var context = texture_placeholder.getContext( '2d' );
 				context.fillStyle = 'rgb( 200, 200, 200 )';
 				context.fillRect( 0, 0, texture_placeholder.width, texture_placeholder.height );
+		function flood_fill_4(x,y,name,color)
+			{
+			var current;
+			current = contexts[name].getImageData(x,y,1,1).data.toString();
+			if ( current==color.toString())
+			{
+			var textureData=textureContexts[name].getImageData(x,y,1,1);
+			for (var i=0;i<3;i++){
+				if(textureData[i]<=245){
+					textureData[i]+=10
+				}else{
+					textureData[i]=255
+				}
+			}
+			textureContexts[name].putImageData(textureData,x,y)
+
+			flood_fill_4(x, y+1,name,color); /* 上 */
+			flood_fill_4(x, y-1,name,color); /* 下 */
+			flood_fill_4(x-1, y,name,color); /* 左 */
+			flood_fill_4(x+1, y,name,color); /* 右 */
+			}
+			}
 		function heightLight(name,color){
 			
 			if(lastPic){
@@ -91,7 +113,25 @@ var APP = {
 			lastobj.material.map.needsUpdate = true;
 				}
 				lastPic=name;
-				
+				var channelData=contexts[name].getImageData(0,0,512,512)
+				var textureData=textureContexts[name].getImageData(0,0,512,512)
+				for(var i=0;i<channelData.data.length-1;i+=4){
+					if(channelData.data[i]==color[0]&&channelData.data[i+1]==color[1]&&channelData.data[i+2]==color[2]){
+						textureData.data[i]+=10;
+						textureData.data[i+1]+=10;
+						textureData.data[i+2]+=10;
+						if(textureData.data[i]>255){
+							textureData.data[i]=255
+						}
+						if(textureData.data[i+1]>255){
+							textureData.data[i+1]=255
+						}
+						if(textureData.data[i+2]>255){
+							textureData.data[i+2]=255
+						}
+					}
+				}
+				debugger;
 			}
 		function loadTexture(name, path ) {
 				var texture = new THREE.Texture( texture_placeholder );
@@ -106,7 +146,6 @@ var APP = {
 					var showImg=new Image();
 					showImg.src=showUrl;
 					texture.image = showImg;
-					console.log(texture)
 					texture.needsUpdate = true;
 
 				};
