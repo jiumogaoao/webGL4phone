@@ -1,7 +1,7 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
 mtllib nx.mtl
-g default
+o nx
 v -353.776062 0.000000 353.776062
 v -483.159729 -0.000000 0.000000
 v -329.427094 -166.145844 329.427094

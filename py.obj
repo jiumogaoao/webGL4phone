@@ -1,7 +1,7 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
 mtllib py.mtl
-g default
+o py
 v -280.092590 280.092590 280.092590
 v 280.092590 280.092590 280.092590
 v -280.092590 280.092590 -280.092590

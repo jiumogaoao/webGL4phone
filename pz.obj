@@ -1,7 +1,7 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
 mtllib pz.mtl
-g default
+o pz
 v 0.000000 0.000000 483.159729
 v -192.881958 -0.000000 450.694458
 v 0.000000 192.881958 450.694458

@@ -1,7 +1,7 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
 mtllib px.mtl
-g default
+o px
 v 353.776062 -0.000000 353.776062
 v 353.776062 0.000000 -353.776062
 v 483.159729 -0.000000 -0.000000
